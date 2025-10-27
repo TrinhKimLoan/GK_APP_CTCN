@@ -4,7 +4,7 @@ public class Category {
     private int id;
     private String name;
     private String type; // "Thu" hoặc "Chi"
-    private int color;   // mã màu (nếu có thời gian thì mở rộng)
+    private int color;   // mã màu
 
     public Category(int id, String name, String type, int color) {
         this.id = id;
