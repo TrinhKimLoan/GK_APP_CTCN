@@ -30,12 +30,12 @@ public class AddTransactionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_transaction);
 
         etAmount = findViewById(R.id.etAmount);
-        etNote = findViewById(R.id.etNote);
-        etDate = findViewById(R.id.etDate);
+        etNote   = findViewById(R.id.etNote);
+        etDate   = findViewById(R.id.etDate);
         etCategoryOther = findViewById(R.id.etCategoryOther);
-        spType = findViewById(R.id.spType);
+        spType   = findViewById(R.id.spType);
         spCategory = findViewById(R.id.spCategory);
-        btnSave = findViewById(R.id.btnSave);
+        btnSave  = findViewById(R.id.btnSave);
 
         storage = new TransactionStorage(this);
 
@@ -44,11 +44,10 @@ public class AddTransactionActivity extends AppCompatActivity {
         setupDatePicker();
         setupAmountFormatting();
 
-        // Nếu sửa giao dịch
-        if(getIntent().hasExtra("transaction_id")){
+        if (getIntent().hasExtra("transaction_id")) {
             String id = getIntent().getStringExtra("transaction_id");
             editTransaction = storage.getTransactionById(id);
-            if(editTransaction != null) loadTransaction(editTransaction);
+            if (editTransaction != null) loadTransaction(editTransaction);
         }
 
         btnSave.setOnClickListener(v -> saveTransaction());
@@ -65,7 +64,9 @@ public class AddTransactionActivity extends AppCompatActivity {
     private void setupCategorySpinner() {
         categoryList = CategoryStorage.loadCategories(this);
         List<String> names = new ArrayList<>();
-        for(Category c : categoryList) names.add(c.getName());
+        for (Category c : categoryList) {
+            names.add(c.getName());
+        }
         names.add("Khác");
 
         ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
@@ -75,8 +76,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         spCategory.setAdapter(categoryAdapter);
 
         spCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selected = parent.getItemAtPosition(position).toString();
                 etCategoryOther.setVisibility(selected.equals("Khác") ? View.VISIBLE : View.GONE);
             }
@@ -86,14 +86,19 @@ public class AddTransactionActivity extends AppCompatActivity {
 
     private void setupDatePicker() {
         etDate.setOnClickListener(v -> showDatePicker());
-        etDate.setOnFocusChangeListener((v, hasFocus) -> { if(hasFocus) showDatePicker(); });
+        etDate.setOnFocusChangeListener((v, hasFocus) -> { if (hasFocus) showDatePicker(); });
     }
 
     private void showDatePicker() {
         Calendar calendar = Calendar.getInstance();
-        new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
-            etDate.setText(String.format("%04d-%02d-%02d", year, month+1, dayOfMonth));
-        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+        new DatePickerDialog(this,
+                (view, year, month, dayOfMonth) -> etDate.setText(
+                        String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth)
+                ),
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+        ).show();
     }
 
     private void setupAmountFormatting() {
@@ -102,17 +107,17 @@ public class AddTransactionActivity extends AppCompatActivity {
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
-                if(isEditingText) return;
+                if (isEditingText) return;
                 isEditingText = true;
 
                 String digits = s.toString().replaceAll("[^\\d]", "");
-                if(!digits.isEmpty()){
-                    try{
+                if (!digits.isEmpty()) {
+                    try {
                         long value = Long.parseLong(digits);
                         String formatted = new DecimalFormat("#,###").format(value) + " VNĐ";
                         etAmount.setText(formatted);
                         etAmount.setSelection(formatted.length() - 4);
-                    }catch(NumberFormatException e){
+                    } catch (NumberFormatException e) {
                         etAmount.setText("");
                     }
                 }
@@ -122,60 +127,61 @@ public class AddTransactionActivity extends AppCompatActivity {
         });
     }
 
-    private void loadTransaction(Transaction t){
-        etAmount.setText(new DecimalFormat("#,###").format((long)t.getAmount()) + " VNĐ");
+    private void loadTransaction(Transaction t) {
+        etAmount.setText(new DecimalFormat("#,###").format((long) t.getAmount()) + " VNĐ");
         etAmount.setSelection(etAmount.getText().length() - 4);
         etNote.setText(t.getNote());
         etDate.setText(t.getDate());
         spType.setSelection(t.getType().equals("Thu") ? 0 : 1);
 
         boolean isOther = true;
-        for(int i=0; i<spCategory.getCount(); i++){
-            if(spCategory.getItemAtPosition(i).toString().equals(t.getCategory())){
+        for (int i = 0; i < spCategory.getCount(); i++) {
+            if (spCategory.getItemAtPosition(i).toString().equals(t.getCategory())) {
                 spCategory.setSelection(i);
                 isOther = false;
                 break;
             }
         }
-        if(isOther){
-            spCategory.setSelection(spCategory.getCount()-1); // Khác
+        if (isOther) {
+            spCategory.setSelection(spCategory.getCount() - 1); // Khác
             etCategoryOther.setText(t.getCategory());
             etCategoryOther.setVisibility(View.VISIBLE);
         }
     }
 
-    private void saveTransaction(){
-        String id = (editTransaction != null) ? editTransaction.getId() : UUID.randomUUID().toString();
+    private void saveTransaction() {
+        String id   = (editTransaction != null) ? editTransaction.getId() : UUID.randomUUID().toString();
         String type = spType.getSelectedItem().toString();
         String rawAmount = etAmount.getText().toString().replace(",", "").replace(" VNĐ", "").trim();
         String date = etDate.getText().toString().trim();
         String note = etNote.getText().toString().trim();
 
-        if(rawAmount.isEmpty()){
+        if (rawAmount.isEmpty()) {
             etAmount.setError("Vui lòng nhập số tiền");
             etAmount.requestFocus();
             return;
         }
 
-        if(date.isEmpty()){
+        if (date.isEmpty()) {
             etDate.setError("Vui lòng chọn ngày");
             etDate.requestFocus();
             return;
         }
 
         double amount;
-        try{ amount = Double.parseDouble(rawAmount); }
-        catch(NumberFormatException e){
+        try {
+            amount = Double.parseDouble(rawAmount);
+        } catch (NumberFormatException e) {
             etAmount.setError("Số tiền không hợp lệ");
             etAmount.requestFocus();
             return;
         }
 
-        // Xử lý category
+        // Category xử lý
         String categoryName;
-        if(spCategory.getSelectedItem().toString().equals("Khác")){
+        if (spCategory.getSelectedItem().toString().equals("Khác")) {
             categoryName = etCategoryOther.getText().toString().trim();
-            if(categoryName.isEmpty()){
+            if (categoryName.isEmpty()) {
                 etCategoryOther.setError("Vui lòng nhập danh mục");
                 etCategoryOther.requestFocus();
                 return;
@@ -189,10 +195,16 @@ public class AddTransactionActivity extends AppCompatActivity {
         }
 
         Transaction t = new Transaction(id, type, categoryName, amount, date, note);
-        if(editTransaction != null) storage.editTransaction(t);
-        else storage.addTransaction(t);
+        if (editTransaction != null) {
+            storage.editTransaction(t);
+        } else {
+            storage.addTransaction(t);
+        }
 
-        Toast.makeText(this, "Giao dịch lưu thành công", Toast.LENGTH_SHORT).show();
+        DecimalFormat formatter = new DecimalFormat("#,###");
+        String formattedAmount = formatter.format((long) amount) + " VNĐ";
+        Toast.makeText(this, "Giao dịch lưu: " + formattedAmount, Toast.LENGTH_SHORT).show();
+
         finish();
     }
 }

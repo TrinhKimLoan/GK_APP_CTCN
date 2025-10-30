@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.chitieucanhan.R;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.ViewHolder> {
@@ -39,18 +40,20 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Transaction t = transactions.get(position);
         holder.tvCategory.setText(t.getCategory());
-        holder.tvAmount.setText(String.valueOf(t.getAmount()));
+
+        // Format tiền
+        double amountValue = t.getAmount();
+        String formatted = new DecimalFormat("#,###").format((long) amountValue) + " VNĐ";
+        holder.tvAmount.setText(formatted);
+
         holder.tvDate.setText(t.getDate());
 
-
-
-        // Set click listener
         holder.btnEdit.setOnClickListener(v -> {
-            if(listener != null) listener.onEditClick(t);
+            if (listener != null) listener.onEditClick(t);
         });
 
         holder.btnDelete.setOnClickListener(v -> {
-            if(listener != null) listener.onDeleteClick(t);
+            if (listener != null) listener.onDeleteClick(t);
         });
     }
 
@@ -66,10 +69,10 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvCategory = itemView.findViewById(R.id.tvCategory);
-            tvAmount = itemView.findViewById(R.id.tvAmount);
-            tvDate = itemView.findViewById(R.id.tvDate);
-            btnEdit = itemView.findViewById(R.id.btnEdit);
-            btnDelete = itemView.findViewById(R.id.btnDelete);
+            tvAmount   = itemView.findViewById(R.id.tvAmount);
+            tvDate     = itemView.findViewById(R.id.tvDate);
+            btnEdit    = itemView.findViewById(R.id.btnEdit);
+            btnDelete  = itemView.findViewById(R.id.btnDelete);
         }
     }
 }
