@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- Theme colors -->
+    <color name="primary">#92C7CF</color>  <!-- Pastel blue as primary color -->
+    <color name="primary_dark">#68A7B1</color>  <!-- Darker pastel blue -->
+    <color name="primary_light">#AAD7DE</color>  <!-- Lighter pastel blue -->
+    <color name="accent">#79B5BD</color>  <!-- Medium pastel blue -->
+</resources>
