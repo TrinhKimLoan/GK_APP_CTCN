@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">ChiTieuCaNhan</string>
+    <string-array name="transaction_types">
+        <item>Thu nhập</item>
+        <item>Chi tiêu</item>
+    </string-array>
+    <string-array name="categories">
+        <item>Ăn uống</item>
+        <item>Đi lại</item>
+        <item>Giải trí</item>
+        <item>Học tập</item>
+        <item>Khác</item>
+    </string-array>
+</resources>
