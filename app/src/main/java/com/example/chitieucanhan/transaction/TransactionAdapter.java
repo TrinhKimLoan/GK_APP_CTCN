@@ -42,6 +42,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         holder.tvAmount.setText(String.valueOf(t.getAmount()));
         holder.tvDate.setText(t.getDate());
 
+
+
         // Set click listener
         holder.btnEdit.setOnClickListener(v -> {
             if(listener != null) listener.onEditClick(t);

@@ -8,10 +8,11 @@ import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.chitieucanhan.R;
+import com.example.chitieucanhan.label.Category;
+import com.example.chitieucanhan.label.CategoryStorage;
 
 import java.text.DecimalFormat;
-import java.util.Calendar;
-import java.util.UUID;
+import java.util.*;
 
 public class AddTransactionActivity extends AppCompatActivity {
 
@@ -19,15 +20,15 @@ public class AddTransactionActivity extends AppCompatActivity {
     private Spinner spType, spCategory;
     private Button btnSave;
     private TransactionStorage storage;
-    private boolean isEditingText = false; // tránh loop format tiền
-    private Transaction editTransaction = null; // nếu sửa
+    private boolean isEditingText = false;
+    private Transaction editTransaction = null;
+    private List<Category> categoryList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_transaction);
 
-        // Ánh xạ
         etAmount = findViewById(R.id.etAmount);
         etNote = findViewById(R.id.etNote);
         etDate = findViewById(R.id.etDate);
@@ -38,11 +39,12 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         storage = new TransactionStorage(this);
 
-        setupSpinners();
+        setupTypeSpinner();
+        setupCategorySpinner();
         setupDatePicker();
         setupAmountFormatting();
 
-        // Nếu intent có Transaction để sửa
+        // Nếu sửa giao dịch
         if(getIntent().hasExtra("transaction_id")){
             String id = getIntent().getStringExtra("transaction_id");
             editTransaction = storage.getTransactionById(id);
@@ -52,21 +54,29 @@ public class AddTransactionActivity extends AppCompatActivity {
         btnSave.setOnClickListener(v -> saveTransaction());
     }
 
-    private void setupSpinners() {
+    private void setupTypeSpinner() {
         ArrayAdapter<CharSequence> typeAdapter = ArrayAdapter.createFromResource(
                 this, R.array.transaction_types, android.R.layout.simple_spinner_item
         );
         typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spType.setAdapter(typeAdapter);
+    }
 
-        ArrayAdapter<CharSequence> categoryAdapter = ArrayAdapter.createFromResource(
-                this, R.array.categories, android.R.layout.simple_spinner_item
+    private void setupCategorySpinner() {
+        categoryList = CategoryStorage.loadCategories(this);
+        List<String> names = new ArrayList<>();
+        for(Category c : categoryList) names.add(c.getName());
+        names.add("Khác");
+
+        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_item, names
         );
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spCategory.setAdapter(categoryAdapter);
 
         spCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selected = parent.getItemAtPosition(position).toString();
                 etCategoryOther.setVisibility(selected.equals("Khác") ? View.VISIBLE : View.GONE);
             }
@@ -119,7 +129,6 @@ public class AddTransactionActivity extends AppCompatActivity {
         etDate.setText(t.getDate());
         spType.setSelection(t.getType().equals("Thu") ? 0 : 1);
 
-        // danh mục
         boolean isOther = true;
         for(int i=0; i<spCategory.getCount(); i++){
             if(spCategory.getItemAtPosition(i).toString().equals(t.getCategory())){
@@ -142,16 +151,6 @@ public class AddTransactionActivity extends AppCompatActivity {
         String date = etDate.getText().toString().trim();
         String note = etNote.getText().toString().trim();
 
-        String category;
-        if(spCategory.getSelectedItem().toString().equals("Khác")){
-            category = etCategoryOther.getText().toString().trim();
-            if(category.isEmpty()){
-                etCategoryOther.setError("Vui lòng nhập danh mục");
-                etCategoryOther.requestFocus();
-                return;
-            }
-        } else category = spCategory.getSelectedItem().toString();
-
         if(rawAmount.isEmpty()){
             etAmount.setError("Vui lòng nhập số tiền");
             etAmount.requestFocus();
@@ -172,7 +171,24 @@ public class AddTransactionActivity extends AppCompatActivity {
             return;
         }
 
-        Transaction t = new Transaction(id, type,  date, amount, category, note);
+        // Xử lý category
+        String categoryName;
+        if(spCategory.getSelectedItem().toString().equals("Khác")){
+            categoryName = etCategoryOther.getText().toString().trim();
+            if(categoryName.isEmpty()){
+                etCategoryOther.setError("Vui lòng nhập danh mục");
+                etCategoryOther.requestFocus();
+                return;
+            }
+            Category newCat = new Category(0, categoryName, type, 0);
+            List<Category> cats = CategoryStorage.loadCategories(this);
+            cats.add(newCat);
+            CategoryStorage.saveCategories(this, cats);
+        } else {
+            categoryName = spCategory.getSelectedItem().toString();
+        }
+
+        Transaction t = new Transaction(id, type, categoryName, amount, date, note);
         if(editTransaction != null) storage.editTransaction(t);
         else storage.addTransaction(t);
 

@@ -7,6 +7,7 @@ public class Transaction {
     private String date; // "yyyy-MM-dd"
     private String note;
 
+
     public Transaction(String id, String type, String category, double amount, String date, String note) {
         this.id = id;
         this.type = type;

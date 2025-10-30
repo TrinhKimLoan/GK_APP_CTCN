@@ -1,32 +1,42 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.TransactionActivity">
+    android:layout_height="match_parent">
 
-    <!-- Thanh tiêu đề -->
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/topAppBar"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:title="Danh sách giao dịch"
-        android:titleTextColor="@android:color/white"
-        app:titleCentered="true"
-        app:navigationIcon="@drawable/ic_launcher_foreground" />
+        android:layout_height="match_parent">
 
-    <!-- Danh sách giao dịch -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:padding="8dp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:scrollbars="vertical" />
+        <!-- Thanh tiêu đề -->
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:title="Danh sách giao dịch"
+            android:titleTextColor="@android:color/white"
+            app:titleCentered="true"
+            app:navigationIcon="@drawable/ic_launcher_foreground" />
+
+        <!-- Spinner lọc danh mục -->
+        <Spinner
+            android:id="@+id/spFilterCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"/>
+
+        <!-- RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:clipToPadding="false"
+            android:scrollbars="vertical"/>
+    </LinearLayout>
 
     <!-- Nút thêm giao dịch -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -38,6 +48,5 @@
         app:srcCompat="@android:drawable/ic_input_add"
         app:tint="@android:color/white"
         app:backgroundTint="@color/purple_500"
-        android:contentDescription="Thêm giao dịch" />
-
+        android:contentDescription="Thêm giao dịch"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

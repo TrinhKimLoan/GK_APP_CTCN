@@ -10,6 +10,8 @@ import android.widget.EditText;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.chitieucanhan.R;
+
 import java.util.List;
 
 public class AddGoalActivity extends AppCompatActivity {
