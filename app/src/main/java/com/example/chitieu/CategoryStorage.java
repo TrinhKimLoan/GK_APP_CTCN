@@ -11,9 +11,9 @@ import java.util.List;
 public class CategoryStorage {
     private static final String FILE_NAME = "categories.json";
 
-    public static List<Category> loadCategories(Context ctx) {
+    public static List<Category> loadCategories(Context context) {
         try {
-            FileInputStream fis = ctx.openFileInput(FILE_NAME);
+            FileInputStream fis = context.openFileInput(FILE_NAME);
             InputStreamReader reader = new InputStreamReader(fis);
             Type listType = new TypeToken<ArrayList<Category>>() {}.getType();
             List<Category> list = new Gson().fromJson(reader, listType);
@@ -24,11 +24,11 @@ public class CategoryStorage {
         }
     }
 
-    public static void saveCategories(Context ctx, List<Category> list) {
+    public static void saveCategories(Context context, List<Category> categories) {
         try {
-            FileOutputStream fos = ctx.openFileOutput(FILE_NAME, Context.MODE_PRIVATE);
+            FileOutputStream fos = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE);
             OutputStreamWriter writer = new OutputStreamWriter(fos);
-            new Gson().toJson(list, writer);
+            new Gson().toJson(categories, writer);
             writer.close();
         } catch (Exception e) {
             e.printStackTrace();
