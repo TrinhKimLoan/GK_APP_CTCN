@@ -4,7 +4,7 @@ public class Category {
     private int id;
     private String name;
     private String type; // "Thu" hoặc "Chi"
-    private int color;   // android color int
+    private int color;   // Android ARGB int
 
     public Category() {}
 
