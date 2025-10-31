@@ -21,7 +21,6 @@ public class CategoryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_category);
 
         categoryList = CategoryStorage.loadCategories(this);
-
         RecyclerView rv = findViewById(R.id.recyclerViewCategories);
         rv.setLayoutManager(new LinearLayoutManager(this));
         adapter = new CategoryAdapter(categoryList);
@@ -30,7 +29,7 @@ public class CategoryActivity extends AppCompatActivity {
         findViewById(R.id.btnAddCategory).setOnClickListener(v -> showAddDialog());
     }
 
-    // ---------------- Helper: parse hex color
+    // parse color string (#RRGGBB or RRGGBB or #AARRGGBB)
     private Integer parseColorOrNull(String hex) {
         if (hex == null) return null;
         hex = hex.trim();
@@ -40,13 +39,10 @@ public class CategoryActivity extends AppCompatActivity {
             if (hex.length() == 6) hex = "FF" + hex;
             long val = Long.parseLong(hex, 16);
             return (int) val;
-        } catch (Exception e) {
-            return null;
-        }
+        } catch (Exception e) { return null; }
     }
 
-    // ---------------- Color picker palette (simple)
-    interface ColorPickCallback { void onPick(int color); }
+    private interface ColorPickCallback { void onPick(int color); }
 
     private void showColorPickerDialog(int initialColor, final ColorPickCallback callback) {
         final int[] palette = new int[] {
@@ -63,7 +59,10 @@ public class CategoryActivity extends AppCompatActivity {
         int pad = (int)(12 * getResources().getDisplayMetrics().density);
         grid.setPadding(pad,pad,pad,pad);
 
-        ArrayAdapter<Integer> ad = new ArrayAdapter<Integer>(this, android.R.layout.simple_list_item_1, Arrays.stream(palette).boxed().toList()) {
+        List<Integer> boxed = new ArrayList<>();
+        for (int c : palette) boxed.add(c);
+
+        ArrayAdapter<Integer> ad = new ArrayAdapter<Integer>(this, android.R.layout.simple_list_item_1, boxed) {
             @NonNull
             @Override
             public View getView(int position, View convertView, @NonNull ViewGroup parent) {
@@ -95,7 +94,7 @@ public class CategoryActivity extends AppCompatActivity {
         dlg.show();
     }
 
-    // ---------------- Add dialog (hex input + palette)
+    // Add dialog (with RadioGroup properly inside the dialog)
     private void showAddDialog() {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -106,13 +105,21 @@ public class CategoryActivity extends AppCompatActivity {
         etName.setHint("Tên danh mục");
         layout.addView(etName);
 
-        final RadioGroup rg = new RadioGroup(this);
+        // RadioGroup with two RadioButtons (ensure same group)
+        RadioGroup rg = new RadioGroup(this);
         rg.setOrientation(RadioGroup.HORIZONTAL);
-        RadioButton rbThu = new RadioButton(this); rbThu.setText("Thu");
-        RadioButton rbChi = new RadioButton(this); rbChi.setText("Chi"); rbChi.setChecked(true);
-        rg.addView(rbThu); rg.addView(rbChi);
+        RadioButton rbThu = new RadioButton(this);
+        rbThu.setId(View.generateViewId());
+        rbThu.setText("Thu");
+        RadioButton rbChi = new RadioButton(this);
+        rbChi.setId(View.generateViewId());
+        rbChi.setText("Chi");
+        rg.addView(rbThu);
+        rg.addView(rbChi);
+        rbChi.setChecked(true); // default
         layout.addView(rg);
 
+        // color row: preview + hex input + palette button
         LinearLayout colorRow = new LinearLayout(this);
         colorRow.setOrientation(LinearLayout.HORIZONTAL);
         colorRow.setGravity(Gravity.CENTER_VERTICAL);
@@ -142,7 +149,8 @@ public class CategoryActivity extends AppCompatActivity {
             if (!hasFocus) {
                 Integer col = parseColorOrNull(etHex.getText().toString());
                 if (col != null) colorPreview.setBackgroundColor(col);
-                else if (!etHex.getText().toString().trim().isEmpty()) Toast.makeText(this, "Mã màu không hợp lệ", Toast.LENGTH_SHORT).show();
+                else if (!etHex.getText().toString().trim().isEmpty())
+                    Toast.makeText(this, "Mã màu không hợp lệ", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -167,7 +175,11 @@ public class CategoryActivity extends AppCompatActivity {
             b.setOnClickListener(v -> {
                 String name = etName.getText().toString().trim();
                 if (name.isEmpty()) { Toast.makeText(this, "Nhập tên", Toast.LENGTH_SHORT).show(); return; }
-                String type = rbThu.isChecked() ? "Thu" : "Chi";
+
+                // get selected radio from the group (ensures mutual exclusion)
+                int checkedId = rg.getCheckedRadioButtonId();
+                String type = (checkedId == rbThu.getId()) ? "Thu" : "Chi";
+
                 Integer parsed = parseColorOrNull(etHex.getText().toString().trim());
                 int color = parsed != null ? parsed : Color.parseColor("#FF7043");
                 int id = generateId();
@@ -177,12 +189,13 @@ public class CategoryActivity extends AppCompatActivity {
                 dlg.dismiss();
             });
         });
+
         dlg.show();
     }
 
-    // ---------------- Edit dialog (similar to add)
     private void showEditDialog(int position) {
         Category c = categoryList.get(position);
+
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         int pad = (int)(16 * getResources().getDisplayMetrics().density);
@@ -192,11 +205,16 @@ public class CategoryActivity extends AppCompatActivity {
         etName.setText(c.getName());
         layout.addView(etName);
 
-        final RadioGroup rg = new RadioGroup(this);
+        RadioGroup rg = new RadioGroup(this);
         rg.setOrientation(RadioGroup.HORIZONTAL);
-        RadioButton rbThu = new RadioButton(this); rbThu.setText("Thu");
-        RadioButton rbChi = new RadioButton(this); rbChi.setText("Chi");
-        rg.addView(rbThu); rg.addView(rbChi);
+        RadioButton rbThu = new RadioButton(this);
+        rbThu.setId(View.generateViewId());
+        rbThu.setText("Thu");
+        RadioButton rbChi = new RadioButton(this);
+        rbChi.setId(View.generateViewId());
+        rbChi.setText("Chi");
+        rg.addView(rbThu);
+        rg.addView(rbChi);
         if ("Thu".equals(c.getType())) rbThu.setChecked(true); else rbChi.setChecked(true);
         layout.addView(rg);
 
@@ -230,7 +248,8 @@ public class CategoryActivity extends AppCompatActivity {
             if (!hasFocus) {
                 Integer col = parseColorOrNull(etHex.getText().toString());
                 if (col != null) colorPreview.setBackgroundColor(col);
-                else if (!etHex.getText().toString().trim().isEmpty()) Toast.makeText(this, "Mã màu không hợp lệ", Toast.LENGTH_SHORT).show();
+                else if (!etHex.getText().toString().trim().isEmpty())
+                    Toast.makeText(this, "Mã màu không hợp lệ", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -255,19 +274,24 @@ public class CategoryActivity extends AppCompatActivity {
             b.setOnClickListener(v -> {
                 String name = etName.getText().toString().trim();
                 if (name.isEmpty()) { Toast.makeText(this, "Nhập tên", Toast.LENGTH_SHORT).show(); return; }
-                c.setName(name);
-                c.setType(rbThu.isChecked() ? "Thu" : "Chi");
+
+                int checkedId = rg.getCheckedRadioButtonId();
+                String type = (checkedId == rbThu.getId()) ? "Thu" : "Chi";
+
                 Integer parsed = parseColorOrNull(etHex.getText().toString().trim());
                 if (parsed != null) c.setColor(parsed);
+                c.setName(name);
+                c.setType(type);
+
                 CategoryStorage.saveCategories(this, categoryList);
                 adapter.notifyDataSetChanged();
                 dlg.dismiss();
             });
         });
+
         dlg.show();
     }
 
-    // ---------------- Delete dialog
     private void showDeleteDialog(int position) {
         new AlertDialog.Builder(this)
                 .setTitle("Xóa danh mục")
@@ -281,17 +305,16 @@ public class CategoryActivity extends AppCompatActivity {
                 .show();
     }
 
-    // ---------------- generate id
     private int generateId() {
         int max = 0;
         for (Category c : categoryList) if (c.getId() > max) max = c.getId();
         return max + 1;
     }
 
-    // ---------------- Adapter
+    // Adapter
     class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.VH> {
         private final List<Category> data;
-        CategoryAdapter(List<Category> data) { this.data = data; }
+        CategoryAdapter(List<Category> list) { this.data = list; }
 
         class VH extends RecyclerView.ViewHolder {
             TextView tvName, tvType;
