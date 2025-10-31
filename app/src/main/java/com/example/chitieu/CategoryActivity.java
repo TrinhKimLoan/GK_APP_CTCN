@@ -8,6 +8,7 @@ import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.*;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.*;
 
 public class CategoryActivity extends AppCompatActivity {
@@ -26,7 +27,8 @@ public class CategoryActivity extends AppCompatActivity {
         adapter = new CategoryAdapter(categoryList);
         rv.setAdapter(adapter);
 
-        findViewById(R.id.btnAddCategory).setOnClickListener(v -> showAddDialog());
+        FloatingActionButton fab = findViewById(R.id.fabAddCategory);
+        fab.setOnClickListener(v -> showAddDialog());
     }
 
     // parse color string (#RRGGBB or RRGGBB or #AARRGGBB)
@@ -94,7 +96,7 @@ public class CategoryActivity extends AppCompatActivity {
         dlg.show();
     }
 
-    // Add dialog (with RadioGroup properly inside the dialog)
+    // Add dialog
     private void showAddDialog() {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -110,16 +112,16 @@ public class CategoryActivity extends AppCompatActivity {
         rg.setOrientation(RadioGroup.HORIZONTAL);
         RadioButton rbThu = new RadioButton(this);
         rbThu.setId(View.generateViewId());
-        rbThu.setText("Thu");
+        rbThu.setText("Thu nhập");
         RadioButton rbChi = new RadioButton(this);
         rbChi.setId(View.generateViewId());
-        rbChi.setText("Chi");
+        rbChi.setText("Chi tiêu");
         rg.addView(rbThu);
         rg.addView(rbChi);
         rbChi.setChecked(true); // default
         layout.addView(rg);
 
-        // color row: preview + hex input + palette button
+        // color row
         LinearLayout colorRow = new LinearLayout(this);
         colorRow.setOrientation(LinearLayout.HORIZONTAL);
         colorRow.setGravity(Gravity.CENTER_VERTICAL);
@@ -140,7 +142,7 @@ public class CategoryActivity extends AppCompatActivity {
         colorRow.addView(etHex);
 
         Button btnPalette = new Button(this);
-        btnPalette.setText("Mở bảng màu");
+        btnPalette.setText("Bảng màu mẫu");
         colorRow.addView(btnPalette);
 
         layout.addView(colorRow);
@@ -176,9 +178,8 @@ public class CategoryActivity extends AppCompatActivity {
                 String name = etName.getText().toString().trim();
                 if (name.isEmpty()) { Toast.makeText(this, "Nhập tên", Toast.LENGTH_SHORT).show(); return; }
 
-                // get selected radio from the group (ensures mutual exclusion)
                 int checkedId = rg.getCheckedRadioButtonId();
-                String type = (checkedId == rbThu.getId()) ? "Thu" : "Chi";
+                String type = (checkedId == rbThu.getId()) ? "Thu nhập" : "Chi tiêu";
 
                 Integer parsed = parseColorOrNull(etHex.getText().toString().trim());
                 int color = parsed != null ? parsed : Color.parseColor("#FF7043");
@@ -209,13 +210,13 @@ public class CategoryActivity extends AppCompatActivity {
         rg.setOrientation(RadioGroup.HORIZONTAL);
         RadioButton rbThu = new RadioButton(this);
         rbThu.setId(View.generateViewId());
-        rbThu.setText("Thu");
+        rbThu.setText("Thu nhập");
         RadioButton rbChi = new RadioButton(this);
         rbChi.setId(View.generateViewId());
-        rbChi.setText("Chi");
+        rbChi.setText("Chi tiêu");
         rg.addView(rbThu);
         rg.addView(rbChi);
-        if ("Thu".equals(c.getType())) rbThu.setChecked(true); else rbChi.setChecked(true);
+        if ("Thu nhập".equals(c.getType())) rbThu.setChecked(true); else rbChi.setChecked(true);
         layout.addView(rg);
 
         LinearLayout colorRow = new LinearLayout(this);
@@ -239,7 +240,7 @@ public class CategoryActivity extends AppCompatActivity {
         colorRow.addView(etHex);
 
         Button btnPalette = new Button(this);
-        btnPalette.setText("Mở bảng màu");
+        btnPalette.setText("Bảng màu mẫu");
         colorRow.addView(btnPalette);
 
         layout.addView(colorRow);
@@ -276,7 +277,7 @@ public class CategoryActivity extends AppCompatActivity {
                 if (name.isEmpty()) { Toast.makeText(this, "Nhập tên", Toast.LENGTH_SHORT).show(); return; }
 
                 int checkedId = rg.getCheckedRadioButtonId();
-                String type = (checkedId == rbThu.getId()) ? "Thu" : "Chi";
+                String type = (checkedId == rbThu.getId()) ? "Thu nhập" : "Chi tiêu";
 
                 Integer parsed = parseColorOrNull(etHex.getText().toString().trim());
                 if (parsed != null) c.setColor(parsed);

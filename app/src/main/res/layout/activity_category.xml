@@ -1,27 +1,41 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="8dp"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="8dp">
 
-    <!-- spacer để đẩy nút xuống giữa -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
-
-    <Button
-        android:id="@+id/btnAddCategory"
-        android:layout_width="match_parent"
+    <!-- Dòng tiêu đề phía trên -->
+    <TextView
+        android:id="@+id/tvCategoryTitle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Thêm danh mục"
-        android:layout_marginBottom="12dp"/>
+        android:text="Danh sách danh mục"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        android:layout_centerHorizontal="true"
+        android:textColor="#000000"/>
 
+    <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewCategories"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
-        android:clipToPadding="false"/>
-</LinearLayout>
+        android:layout_height="match_parent"
+        android:layout_below="@id/tvCategoryTitle"
+        android:clipToPadding="false"
+        android:paddingBottom="80dp"
+        android:layout_marginTop="12dp" />
+
+    <!-- FAB ở góc phải dưới -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="Thêm danh mục"
+        app:srcCompat="@drawable/ic_add"
+        app:backgroundTint="@color/purple_500"
+        android:tint="@android:color/white"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"/>
+</RelativeLayout>
