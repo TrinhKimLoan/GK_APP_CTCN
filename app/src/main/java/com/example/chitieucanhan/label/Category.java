@@ -4,7 +4,9 @@ public class Category {
     private int id;
     private String name;
     private String type; // "Thu" hoặc "Chi"
-    private int color;   // mã màu
+    private int color;   // Android ARGB int
+
+    public Category() {}
 
     public Category(int id, String name, String type, int color) {
         this.id = id;
@@ -18,6 +20,7 @@ public class Category {
     public String getType() { return type; }
     public int getColor() { return color; }
 
+    public void setId(int id) { this.id = id; }
     public void setName(String name) { this.name = name; }
     public void setType(String type) { this.type = type; }
     public void setColor(int color) { this.color = color; }

@@ -24,6 +24,9 @@
         <activity android:name=".label.CategoryActivity" />
         <activity android:name=".transaction.AddTransactionActivity" />
         <activity android:name=".transaction.TransactionActivity" />
+        <activity android:name=".goal.GoalActivity" />
+        <activity android:name=".goal.AddGoalActivity" />
+
     </application>
 
 </manifest>

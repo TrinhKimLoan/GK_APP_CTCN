@@ -3,14 +3,12 @@ package com.example.chitieucanhan;
 import com.example.chitieucanhan.label.CategoryActivity;
 import com.example.chitieucanhan.transaction.TransactionActivity;
 import com.example.chitieucanhan.transaction.AddTransactionActivity;
+import com.example.chitieucanhan.goal.GoalActivity;
+
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
-import androidx.core.graphics.Insets;
 import android.os.Bundle;
 import android.widget.Button;
-import androidx.core.view.ViewCompat;
-import android.view.MenuItem;
-import androidx.activity.EdgeToEdge;
 
 public class MainActivity extends AppCompatActivity {
     private Button btnViewTransactions, btnAddTransaction;
@@ -19,26 +17,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-        BottomNavigationView nav = findViewById(R.id.bottom_nav);
-        if (nav != null) {
-            nav.setOnItemSelectedListener(item -> {
-                return onNavItemSelected(item);
-            });
-            // set default selected to goals
-            nav.setSelectedItemId(R.id.nav_goals);
-        }
-
         Button btnCategory = findViewById(R.id.btnOpenCategory);
-        btnCategory.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, CategoryActivity.class);
-            startActivity(intent);
-        });
+        btnCategory.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, CategoryActivity.class)));
 
         btnViewTransactions = findViewById(R.id.btnViewTransactions);
         btnAddTransaction = findViewById(R.id.btnAddTransaction);
@@ -54,25 +34,18 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, AddTransactionActivity.class);
             startActivity(intent);
         });
-    }
 
-    private boolean onNavItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.nav_goals) {
-            startActivity(new Intent(this, GoalActivity.class));
-            return true;
-        }
-        // placeholders for other tabs
-        if (id == R.id.nav_transactions) {
-            // implement TransactionsActivity later; for now open MainActivity (no-op)
-            return true;
-        }
-        if (id == R.id.nav_categories) {
-            return true;
-        }
-        if (id == R.id.nav_dashboard) {
-            return true;
-        }
-        return false;
+        // Mở màn hình SET GOAL
+        Button btnGoGoal = findViewById(R.id.btn_go_goal);
+        btnGoGoal.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, GoalActivity.class);
+            startActivity(intent);
+        });
+
+        Button btnOpenBudget = findViewById(R.id.btnOpenBudget);
+        btnOpenBudget.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, com.example.chitieucanhan.chart.BudgetActivity.class);
+            startActivity(intent);
+        });
     }
 }

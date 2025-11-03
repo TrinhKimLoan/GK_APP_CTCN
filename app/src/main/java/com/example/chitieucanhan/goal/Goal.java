@@ -1,19 +1,21 @@
 package com.example.chitieucanhan.goal;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.concurrent.TimeUnit;
 
-import java.io.Serializable;
-
-public class Goal implements Serializable {
+public class Goal {
     private String name;
-    private long targetAmount;
-    private long savedAmount;
+    private double targetAmount;
+    private double savedAmount;
+    private long dueDate; // stored as epoch millis
 
-    public Goal(String name, long targetAmount, long savedAmount) {
+    public Goal() {
+    }
+
+    public Goal(String name, double targetAmount, double savedAmount, long dueDate) {
         this.name = name;
         this.targetAmount = targetAmount;
         this.savedAmount = savedAmount;
+        this.dueDate = dueDate;
     }
 
     public String getName() {
@@ -24,46 +26,42 @@ public class Goal implements Serializable {
         this.name = name;
     }
 
-    public long getTargetAmount() {
+    public double getTargetAmount() {
         return targetAmount;
     }
 
-    public void setTargetAmount(long targetAmount) {
+    public void setTargetAmount(double targetAmount) {
         this.targetAmount = targetAmount;
     }
 
-    public long getSavedAmount() {
+    public double getSavedAmount() {
         return savedAmount;
     }
 
-    public void setSavedAmount(long savedAmount) {
+    public void setSavedAmount(double savedAmount) {
         this.savedAmount = savedAmount;
     }
 
-    public double getProgressPercent() {
+    public long getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(long dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public int getProgressPercent() {
         if (targetAmount <= 0) return 0;
-        return Math.min(100.0, (savedAmount * 100.0) / targetAmount);
+        return (int) ((savedAmount / targetAmount) * 100);
     }
 
-    public JSONObject toJson() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put("name", name);
-            o.put("targetAmount", targetAmount);
-            o.put("savedAmount", savedAmount);
-        } catch (JSONException ignored) {
-        }
-        return o;
+    public long getDaysLeft() {
+        long now = System.currentTimeMillis();
+        long diff = dueDate - now;
+        return diff <= 0 ? 0 : TimeUnit.MILLISECONDS.toDays(diff);
     }
 
-    public static Goal fromJson(JSONObject o) {
-        try {
-            String name = o.optString("name", "");
-            long target = o.optLong("targetAmount", 0);
-            long saved = o.optLong("savedAmount", 0);
-            return new Goal(name, target, saved);
-        } catch (Exception e) {
-            return null;
-        }
+    public boolean isOverdue() {
+        return System.currentTimeMillis() > dueDate;
     }
 }

@@ -2,9 +2,14 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="purple_200">#BB86FC</color>
-    <color name="purple_500">#6200EE</color>
+    <color name="purple_500">#6db9fc</color>
     <color name="purple_700">#3700B3</color>
     <color name="teal_200">#03DAC5</color>
     <color name="teal_700">#018786</color>
+    <!--<color name="pastel_blue">#AEC6CF</color>-->
+    <!-- Theme colors -->
+    <color name="primary">#92C7CF</color>  <!-- Pastel blue as primary color -->
+    <color name="primary_dark">#68A7B1</color>  <!-- Darker pastel blue -->
+    <color name="primary_light">#AAD7DE</color>  <!-- Lighter pastel blue -->
+    <color name="accent">#79B5BD</color>  <!-- Medium pastel blue -->
 </resources>

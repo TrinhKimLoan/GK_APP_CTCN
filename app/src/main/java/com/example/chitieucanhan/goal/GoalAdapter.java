@@ -1,67 +1,132 @@
 package com.example.chitieucanhan.goal;
+import com.example.chitieucanhan.R;
 
-import android.content.Context;
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GoalAdapter extends RecyclerView.Adapter<GoalAdapter.ViewHolder> {
-    private final List<Goal> items;
-    private final Context ctx;
-    private final OnItemClickListener listener;
 
-    public interface OnItemClickListener {
-        void onItemClick(int position);
+    private List<Goal> data = new ArrayList<>();
+    private List<Goal> original = new ArrayList<>();
+    private OnItemActionListener listener;
+
+    public interface OnItemActionListener {
+        void onEdit(int index, Goal goal);
+
+        void onTransfer(int index, Goal goal);
+        void onDelete(int index, Goal goal); // Xử lí xóa
     }
 
-    public GoalAdapter(Context ctx, List<Goal> items, OnItemClickListener listener) {
-        this.ctx = ctx;
-        this.items = items;
-        this.listener = listener;
+    public void setOnItemActionListener(OnItemActionListener l) {
+        this.listener = l;
+    }
+
+    public void setData(List<Goal> list) {
+        this.data = new ArrayList<>(list);
+        this.original = new ArrayList<>(list);
+        notifyDataSetChanged();
+    }
+
+    public void filter(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            data = new ArrayList<>(original);
+        } else {
+            String q = query.toLowerCase();
+            List<Goal> filtered = new ArrayList<>();
+            for (Goal g : original) {
+                if (g.getName() != null && g.getName().toLowerCase().contains(q)) {
+                    filtered.add(g);
+                }
+            }
+            data = filtered;
+        }
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_goal_card, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_goal, parent, false);
         return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Goal g = items.get(position);
+        Goal g = data.get(position);
         holder.name.setText(g.getName());
-        holder.target.setText(String.format("Target: %d", g.getTargetAmount()));
-        holder.saved.setText(String.format("Saved: %d", g.getSavedAmount()));
-        int progress = (int) Math.round(g.getProgressPercent());
-        holder.progress.setProgress(progress);
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) listener.onItemClick(position);
+        holder.amounts.setText(String.format("%.2f / %.2f", g.getSavedAmount(), g.getTargetAmount()));
+        int progress = g.getProgressPercent();
+        holder.progressBar.setProgress(progress);
+        holder.progressText.setText(progress + "%");
+
+        // 👉 Thêm đoạn này để hiển thị số ngày còn lại
+        long daysLeft = g.getDaysLeft();
+        if (g.isOverdue()) {
+            holder.daysLeft.setText("Đã quá hạn");
+            holder.daysLeft.setTextColor(0xFFFF4081); // màu hồng cảnh báo
+        } else {
+            holder.daysLeft.setText("Còn " + daysLeft + " ngày");
+            holder.daysLeft.setTextColor(0xFF000000); // đen bình thường
+        }
+
+        holder.editBtn.setOnClickListener(v -> {
+            if (listener != null) {
+                int origIndex = findOriginalIndex(g);
+                listener.onEdit(origIndex, g);
+            }
         });
+
+        holder.deleteBtn.setOnClickListener(v -> {
+            if (listener != null) {
+                int origIndex = findOriginalIndex(g);
+                listener.onDelete(origIndex, g);
+            }
+        });
+    }
+
+    private int findOriginalIndex(Goal g) {
+        for (int i = 0; i < original.size(); i++) {
+            Goal og = original.get(i);
+            if (og.getName() != null && og.getName().equals(g.getName())) return i;
+        }
+        return -1;
     }
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return data.size();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView name, target, saved;
-        ProgressBar progress;
+        TextView name;
+        TextView amounts;
+        ProgressBar progressBar;
+        TextView progressText;
+        ImageButton editBtn;
+
+        TextView daysLeft;
+        ImageButton deleteBtn;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.goal_name);
-            target = itemView.findViewById(R.id.goal_target);
-            saved = itemView.findViewById(R.id.goal_saved);
-            progress = itemView.findViewById(R.id.goal_progress);
+            amounts = itemView.findViewById(R.id.goal_amounts);
+            progressBar = itemView.findViewById(R.id.goal_progress_bar);
+            progressText = itemView.findViewById(R.id.goal_progress_text);
+            editBtn = itemView.findViewById(R.id.btn_edit_goal);
+            daysLeft = itemView.findViewById(R.id.goal_days_left);
+            deleteBtn = itemView.findViewById(R.id.btn_delete_goal);
         }
     }
 }
