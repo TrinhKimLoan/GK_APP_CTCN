@@ -1,5 +1,6 @@
 package com.example.chitieucanhan.transaction;
 
+
 import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.text.Editable;
@@ -11,10 +12,13 @@ import com.example.chitieucanhan.R;
 import com.example.chitieucanhan.label.Category;
 import com.example.chitieucanhan.label.CategoryStorage;
 
+
 import java.text.DecimalFormat;
 import java.util.*;
 
+
 public class AddTransactionActivity extends AppCompatActivity {
+
 
     private EditText etAmount, etNote, etDate, etCategoryOther;
     private Spinner spType, spCategory;
@@ -24,10 +28,12 @@ public class AddTransactionActivity extends AppCompatActivity {
     private Transaction editTransaction = null;
     private List<Category> categoryList;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_transaction);
+
 
         etAmount = findViewById(R.id.etAmount);
         etNote   = findViewById(R.id.etNote);
@@ -37,12 +43,15 @@ public class AddTransactionActivity extends AppCompatActivity {
         spCategory = findViewById(R.id.spCategory);
         btnSave  = findViewById(R.id.btnSave);
 
+
         storage = new TransactionStorage(this);
+
 
         setupTypeSpinner();
         setupCategorySpinner();
         setupDatePicker();
         setupAmountFormatting();
+
 
         if (getIntent().hasExtra("transaction_id")) {
             String id = getIntent().getStringExtra("transaction_id");
@@ -50,8 +59,10 @@ public class AddTransactionActivity extends AppCompatActivity {
             if (editTransaction != null) loadTransaction(editTransaction);
         }
 
+
         btnSave.setOnClickListener(v -> saveTransaction());
     }
+
 
     private void setupTypeSpinner() {
         ArrayAdapter<CharSequence> typeAdapter = ArrayAdapter.createFromResource(
@@ -59,21 +70,47 @@ public class AddTransactionActivity extends AppCompatActivity {
         );
         typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spType.setAdapter(typeAdapter);
+        // THÊM MỚI ĐỂ XỬ LÍ PHÂN LOẠI CHI/THU cho nhãn
+        spType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                setupCategorySpinner(); // cập nhật lại danh mục khi đổi loại
+            }
+
+
+            @Override public void onNothingSelected(AdapterView<?> parent) { }
+        });
+
+
     }
 
+
     private void setupCategorySpinner() {
+//        categoryList = CategoryStorage.loadCategories(this);
+//        List<String> names = new ArrayList<>();
+//        for (Category c : categoryList) {
+//            names.add(c.getName());
+//        }
+//        names.add("Khác");
+        String selectedType = spType.getSelectedItem().toString(); // "Chi" hoặc "Thu"
         categoryList = CategoryStorage.loadCategories(this);
         List<String> names = new ArrayList<>();
+
+
         for (Category c : categoryList) {
-            names.add(c.getName());
+            if (c.getType().equals(selectedType)) {  // lọc theo loại
+                names.add(c.getName());
+            }
         }
         names.add("Khác");
+
 
         ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_item, names
         );
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spCategory.setAdapter(categoryAdapter);
+
 
         spCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -84,10 +121,12 @@ public class AddTransactionActivity extends AppCompatActivity {
         });
     }
 
+
     private void setupDatePicker() {
         etDate.setOnClickListener(v -> showDatePicker());
         etDate.setOnFocusChangeListener((v, hasFocus) -> { if (hasFocus) showDatePicker(); });
     }
+
 
     private void showDatePicker() {
         Calendar calendar = Calendar.getInstance();
@@ -101,6 +140,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         ).show();
     }
 
+
     private void setupAmountFormatting() {
         etAmount.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -109,6 +149,7 @@ public class AddTransactionActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 if (isEditingText) return;
                 isEditingText = true;
+
 
                 String digits = s.toString().replaceAll("[^\\d]", "");
                 if (!digits.isEmpty()) {
@@ -122,10 +163,12 @@ public class AddTransactionActivity extends AppCompatActivity {
                     }
                 }
 
+
                 isEditingText = false;
             }
         });
     }
+
 
     private void loadTransaction(Transaction t) {
         etAmount.setText(new DecimalFormat("#,###").format((long) t.getAmount()) + " VNĐ");
@@ -133,6 +176,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         etNote.setText(t.getNote());
         etDate.setText(t.getDate());
         spType.setSelection(t.getType().equals("Thu") ? 0 : 1);
+
 
         boolean isOther = true;
         for (int i = 0; i < spCategory.getCount(); i++) {
@@ -149,6 +193,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         }
     }
 
+
     private void saveTransaction() {
         String id   = (editTransaction != null) ? editTransaction.getId() : UUID.randomUUID().toString();
         String type = spType.getSelectedItem().toString();
@@ -156,17 +201,20 @@ public class AddTransactionActivity extends AppCompatActivity {
         String date = etDate.getText().toString().trim();
         String note = etNote.getText().toString().trim();
 
+
         if (rawAmount.isEmpty()) {
             etAmount.setError("Vui lòng nhập số tiền");
             etAmount.requestFocus();
             return;
         }
 
+
         if (date.isEmpty()) {
             etDate.setError("Vui lòng chọn ngày");
             etDate.requestFocus();
             return;
         }
+
 
         double amount;
         try {
@@ -176,6 +224,7 @@ public class AddTransactionActivity extends AppCompatActivity {
             etAmount.requestFocus();
             return;
         }
+
 
         // Category xử lý
         String categoryName;
@@ -194,6 +243,7 @@ public class AddTransactionActivity extends AppCompatActivity {
             categoryName = spCategory.getSelectedItem().toString();
         }
 
+
         Transaction t = new Transaction(id, type, categoryName, amount, date, note);
         if (editTransaction != null) {
             storage.editTransaction(t);
@@ -201,10 +251,13 @@ public class AddTransactionActivity extends AppCompatActivity {
             storage.addTransaction(t);
         }
 
+
         DecimalFormat formatter = new DecimalFormat("#,###");
         String formattedAmount = formatter.format((long) amount) + " VNĐ";
         Toast.makeText(this, "Giao dịch lưu: " + formattedAmount, Toast.LENGTH_SHORT).show();
 
+
         finish();
     }
 }
+
