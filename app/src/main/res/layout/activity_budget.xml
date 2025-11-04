@@ -7,7 +7,7 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:text="💰 Quản lý hạn mức chi tiêu"
+        android:text="Quản lý hạn mức chi tiêu tháng này"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_marginBottom="20dp"
@@ -24,29 +24,37 @@
 
     <Button
         android:id="@+id/btnSave"
-        android:text="💾 Lưu hạn mức"
+        android:text="Lưu hạn mức"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp" />
 
-    <EditText
-        android:id="@+id/edtSpent"
-        android:hint="Nhập tổng chi tiêu tháng (đ)"
-        android:inputType="numberDecimal"
-        android:layout_marginBottom="12dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
     <Button
         android:id="@+id/btnCheck"
-        android:text="🔍 Kiểm tra vượt hạn mức"
+        android:text="Kiểm tra vượt hạn mức"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <Button
-        android:id="@+id/btnViewChart"
-        android:text="📊 Xem biểu đồ tài chính"
-        android:layout_width="match_parent"
+    <!-- Progress Bar hiển thị phần trăm chi tiêu -->
+    <TextView
+        android:id="@+id/txtProgressStatus"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp" />
+        android:text="Tiến độ chi tiêu"
+        android:layout_marginTop="20dp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:visibility="gone"/>
+
+    <ProgressBar
+        android:id="@+id/progressBarBudget"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:max="100"
+        android:progress="0"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"
+        android:progressTint="@android:color/holo_green_dark"/>
+
 </LinearLayout>

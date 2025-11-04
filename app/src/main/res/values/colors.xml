@@ -12,4 +12,5 @@
     <color name="primary_dark">#68A7B1</color>  <!-- Darker pastel blue -->
     <color name="primary_light">#AAD7DE</color>  <!-- Lighter pastel blue -->
     <color name="accent">#79B5BD</color>  <!-- Medium pastel blue -->
+    <color name="gray_light">#CCCCCC</color>
 </resources>

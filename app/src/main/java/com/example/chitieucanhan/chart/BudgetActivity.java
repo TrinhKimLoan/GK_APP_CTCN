@@ -10,26 +10,37 @@ import android.text.TextWatcher;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import com.example.chitieucanhan.transaction.Transaction;
+import com.example.chitieucanhan.transaction.TransactionStorage;
+import java.util.Calendar;
+import java.util.List;
+
 public class BudgetActivity extends AppCompatActivity {
 
     private EditText edtBudget;
-    private Button btnSave, btnCheck, btnViewChart;
-    private float totalSpentThisMonth = 4800000f; // 👈 Giả lập tổng chi tháng này
+    private Button btnSave, btnCheck;
+    private float totalSpentThisMonth;
+    private ProgressBar progressBarBudget;
+    private TextView txtProgressStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_budget);
 
+        totalSpentThisMonth = getTotalSpentThisMonth(); // Lấy dữ liệu thật từ file JSON
         edtBudget = findViewById(R.id.edtBudget);
         btnSave = findViewById(R.id.btnSave);
         btnCheck = findViewById(R.id.btnCheck);
-        btnViewChart = findViewById(R.id.btnViewChart);
+        progressBarBudget = findViewById(R.id.progressBarBudget);
+        txtProgressStatus = findViewById(R.id.txtProgressStatus);
 
         // Hiện hạn mức hiện tại
         float currentBudget = BudgetSetting.getTotalBudget(this);
-        if (currentBudget > 0)
+        if (currentBudget > 0) {
             edtBudget.setText(formatMoney(currentBudget));
+            updateProgressBar(currentBudget, totalSpentThisMonth);
+        }
 
         // 🪄 Tự động format tiền khi nhập
         edtBudget.addTextChangedListener(new TextWatcher() {
@@ -65,22 +76,84 @@ public class BudgetActivity extends AppCompatActivity {
 
         // Kiểm tra chi tiêu tự động (dùng dữ liệu giả)
         btnCheck.setOnClickListener(v -> {
-            boolean over = BudgetSetting.checkBudgetStatus(this, totalSpentThisMonth);
-            if (over) {
-                Toast.makeText(this, "⚠️ Vượt hạn mức chi tiêu! (Chi: " + formatMoney(totalSpentThisMonth) + ")", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(this, "✅ Còn trong hạn mức. (Chi: " + formatMoney(totalSpentThisMonth) + ")", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // Xem biểu đồ
-        btnViewChart.setOnClickListener(v -> {
-            Toast.makeText(this, "Đang mở biểu đồ...", Toast.LENGTH_SHORT).show();
-            startActivity(new android.content.Intent(this, StatisticsActivity.class));
+            updateProgressBar(BudgetSetting.getTotalBudget(this), totalSpentThisMonth);
         });
     }
 
     private String formatMoney(float amount) {
         return String.format("%,.0f đ", amount);
+    }
+
+    private void updateProgressBar(float limit, float spent) {
+        if (limit <= 0) {
+            progressBarBudget.setVisibility(View.GONE);
+            txtProgressStatus.setVisibility(View.GONE);
+            return;
+        }
+
+        int percent = Math.round((spent / limit) * 100);
+        if (percent > 100) percent = 100;
+
+        // Hiển thị thanh tiến độ
+        progressBarBudget.setVisibility(View.VISIBLE);
+        txtProgressStatus.setVisibility(View.VISIBLE);
+        progressBarBudget.setProgress(percent);
+
+        // Đổi màu theo phần trăm
+        int colorRes;
+        if (percent < 70) {
+            colorRes = android.R.color.holo_green_dark; // an toàn
+        } else if (percent < 100) {
+            colorRes = android.R.color.holo_orange_dark; // cảnh báo
+        } else {
+            colorRes = android.R.color.holo_red_dark; // vượt hạn mức
+        }
+
+        progressBarBudget.setProgressTintList(android.content.res.ColorStateList.valueOf(
+                getResources().getColor(colorRes)));
+
+        // Cập nhật text trạng thái
+        String statusText;
+        int percentUsed = Math.round((spent / limit) * 100);
+
+        if (spent < limit) {
+            float remaining = limit - spent;
+            statusText = String.format("Đã dùng %d%% hạn mức (còn %s)",
+                    percentUsed, formatMoney(remaining));
+        } else {
+            float over = spent - limit;
+            statusText = String.format("⚠️ Đã vượt %s (%d%%)",
+                    formatMoney(over), percentUsed);
+        }
+
+        txtProgressStatus.setText(statusText);
+    }
+    private float getTotalSpentThisMonth() {
+        TransactionStorage storage = new TransactionStorage(this);
+        List<Transaction> allTransactions = storage.getAllTransactions();
+        float total = 0f;
+
+        Calendar now = Calendar.getInstance();
+        int currentMonth = now.get(Calendar.MONTH) + 1; // Tháng bắt đầu từ 0
+        int currentYear = now.get(Calendar.YEAR);
+
+        for (Transaction t : allTransactions) {
+            try {
+                if (!t.getType().toLowerCase().contains("chi")) continue; // Chỉ tính mục CHI
+
+                // Định dạng ngày là "yyyy-MM-dd"
+                String[] parts = t.getDate().split("-");
+                int year = Integer.parseInt(parts[0]);
+                int month = Integer.parseInt(parts[1]);
+
+                if (year == currentYear && month == currentMonth) {
+                    total += t.getAmount();
+                }
+            } catch (Exception e) {
+                e.printStackTrace(); // phòng lỗi định dạng ngày
+            }
+        }
+
+        return total;
     }
 }

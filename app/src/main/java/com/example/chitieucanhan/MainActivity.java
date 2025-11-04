@@ -4,6 +4,8 @@ import com.example.chitieucanhan.label.CategoryActivity;
 import com.example.chitieucanhan.transaction.TransactionActivity;
 import com.example.chitieucanhan.transaction.AddTransactionActivity;
 import com.example.chitieucanhan.goal.GoalActivity;
+import com.example.chitieucanhan.chart.StatisticsActivity;
+import com.example.chitieucanhan.chart.BudgetActivity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
@@ -44,7 +46,13 @@ public class MainActivity extends AppCompatActivity {
 
         Button btnOpenBudget = findViewById(R.id.btnOpenBudget);
         btnOpenBudget.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, com.example.chitieucanhan.chart.BudgetActivity.class);
+            Intent intent = new Intent(MainActivity.this, BudgetActivity.class);
+            startActivity(intent);
+        });
+
+        Button btnOpenChart = findViewById(R.id.btnOpenChart);
+        btnOpenChart.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, StatisticsActivity.class);
             startActivity(intent);
         });
     }

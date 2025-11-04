@@ -52,4 +52,13 @@
         android:layout_marginTop="16dp"
         android:layout_gravity="center"
         />
+
+    <Button
+        android:id="@+id/btnOpenChart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Biểu đồ chi/thu tháng này"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center"
+        />
 </LinearLayout>
