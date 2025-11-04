@@ -9,9 +9,14 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import java.util.ArrayList;
 
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.AdapterView;
+
 public class StatisticsActivity extends AppCompatActivity {
     private PieChart pieChart;
-    private BarChart barChart;
+    private Spinner spinnerPieType, spinnerPieMonth, spinnerPieYear;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,18 +24,55 @@ public class StatisticsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_statistics);
 
         pieChart = findViewById(R.id.pieChart);
-        barChart = findViewById(R.id.barChart);
+
+        // === Bắt đầu xử lí spinner
+        // Spinner refs
+        spinnerPieType = findViewById(R.id.spinnerPieType);
+        spinnerPieMonth = findViewById(R.id.spinnerPieMonth);
+        spinnerPieYear = findViewById(R.id.spinnerPieYear);
+
+        // --- Dữ liệu mẫu cho spinner ---
+        String[] pieTypes = {"Chi", "Thu"}; // danh mục chi/thu
+        String[] months = {"1","2","3","4","5","6","7","8","9","10","11","12"};
+        String[] years = {"2024","2025"}; // expand khi cần
+
+        // adapter đơn giản
+        spinnerPieType.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, pieTypes));
+        spinnerPieMonth.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, months));
+        spinnerPieYear.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, years));
+
+        // Listener: khi thay đổi => refresh chart tương ứng
+        AdapterView.OnItemSelectedListener pieListener = new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String type = spinnerPieType.getSelectedItem().toString();
+                int month = Integer.parseInt(spinnerPieMonth.getSelectedItem().toString());
+                int year = Integer.parseInt(spinnerPieYear.getSelectedItem().toString());
+                refreshPieChart(type, month, year);
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        };
+
+        spinnerPieType.setOnItemSelectedListener(pieListener);
+        spinnerPieMonth.setOnItemSelectedListener(pieListener);
+        spinnerPieYear.setOnItemSelectedListener(pieListener);
+
+        // Khởi tạo lần đầu (mặc định chọn index 0)
+        spinnerPieType.setSelection(0);
+        spinnerPieMonth.setSelection(0);
+        spinnerPieYear.setSelection(1); // ví dụ 2025
+        // === Kết thúc xử lí spinner
 
         setupPieChart();
-        setupBarChart();
     }
 
     private void setupPieChart() {
+        // Giả dữ liệu danh mục
         ArrayList<PieEntry> entries = new ArrayList<>();
         entries.add(new PieEntry(2500000, "Ăn uống"));
         entries.add(new PieEntry(1200000, "Đi lại"));
         entries.add(new PieEntry(800000, "Giải trí"));
         entries.add(new PieEntry(500000, "Khác"));
+        // END Giả dữ liệu danh mục
 
         PieDataSet dataSet = new PieDataSet(entries, "Danh mục chi tiêu");
         dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
@@ -70,38 +112,36 @@ public class StatisticsActivity extends AppCompatActivity {
         pieChart.invalidate();
     }
 
-    private void setupBarChart() {
-        ArrayList<BarEntry> incomeEntries = new ArrayList<>();
-        ArrayList<BarEntry> expenseEntries = new ArrayList<>();
+    private void setupPieChartBase() {
+        pieChart.getDescription().setEnabled(false);
+        pieChart.setCenterTextSize(14f);
+        pieChart.setEntryLabelTextSize(12f);
+        pieChart.animateY(500);
+    }
 
-        incomeEntries.add(new BarEntry(5, 7000000));
-        incomeEntries.add(new BarEntry(6, 6500000));
-        incomeEntries.add(new BarEntry(7, 8000000));
-        incomeEntries.add(new BarEntry(8, 6000000));
-        incomeEntries.add(new BarEntry(9, 7500000));
-        incomeEntries.add(new BarEntry(10, 7000000));
+    // refresh Pie theo type/month/year
+    private void refreshPieChart(String type, int month, int year) {
+        // Giả dữ liệu cho Dữ liệu thu và chi trong PieChart
+        ArrayList<PieEntry> entries = new ArrayList<>();
+        if (type.equals("Chi")) {
+            entries.add(new PieEntry(2500000, "Ăn uống"));
+            entries.add(new PieEntry(1200000, "Đi lại"));
+            entries.add(new PieEntry(800000, "Giải trí"));
+            entries.add(new PieEntry(500000, "Khác"));
+        } else {
+            // dữ liệu thu ví dụ
+            entries.add(new PieEntry(7000000, "Lương"));
+            entries.add(new PieEntry(1000000, "Thưởng"));
+        }
+        // END Giả dữ liệu cho Dữ liệu thu và chi trong PieChart
 
-        expenseEntries.add(new BarEntry(5, 4500000));
-        expenseEntries.add(new BarEntry(6, 5200000));
-        expenseEntries.add(new BarEntry(7, 5000000));
-        expenseEntries.add(new BarEntry(8, 4800000));
-        expenseEntries.add(new BarEntry(9, 5500000));
-        expenseEntries.add(new BarEntry(10, 4900000));
+        PieDataSet dataSet = new PieDataSet(entries, type + " tháng " + month + "/" + year);
+        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+        dataSet.setValueTextSize(12f);
 
-        BarDataSet incomeSet = new BarDataSet(incomeEntries, "Thu nhập");
-        incomeSet.setColor(ColorTemplate.COLORFUL_COLORS[2]);
-
-        BarDataSet expenseSet = new BarDataSet(expenseEntries, "Chi tiêu");
-        expenseSet.setColor(ColorTemplate.COLORFUL_COLORS[0]);
-
-        BarData data = new BarData(incomeSet, expenseSet);
-        data.setBarWidth(0.35f);
-
-        barChart.setData(data);
-        barChart.groupBars(4.5f, 0.4f, 0.05f);
-        barChart.getDescription().setEnabled(false);
-        barChart.setFitBars(true);
-        barChart.animateY(800);
-        barChart.invalidate();
+        PieData data = new PieData(dataSet);
+        pieChart.setData(data);
+        pieChart.setCenterText(type + " " + month + "/" + year);
+        pieChart.invalidate();
     }
 }
