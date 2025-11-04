@@ -13,4 +13,9 @@
     <color name="primary_light">#AAD7DE</color>  <!-- Lighter pastel blue -->
     <color name="accent">#79B5BD</color>  <!-- Medium pastel blue -->
     <color name="gray_light">#CCCCCC</color>
+
+    <color name="blue_600">#FF1E88E5</color>
+    <color name="orange_600">#FFFB8C00</color>
+    <color name="green_600">#FF43A047</color>
+    <color name="pink_600">#FFD81B60</color>
 </resources>
